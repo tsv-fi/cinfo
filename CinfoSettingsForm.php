@@ -13,7 +13,16 @@
  * @brief Form for managers to modify cinfo plugin settings
  */
 
-import('lib.pkp.classes.form.Form');
+namespace APP\plugins\generic\cinfo;
+
+use PKP\form\Form;
+use PKP\form\validation\FormValidator;
+use PKP\form\validation\FormValidatorPost;
+use PKP\form\validation\FormValidatorCSRF;
+use APP\notification\NotificationManager;
+use APP\template\TemplateManager;
+use APP\core\Application;
+use PKP\notification\Notification;
 
 class CinfoSettingsForm extends Form {
 
