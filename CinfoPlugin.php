@@ -3,8 +3,8 @@
 /**
  * @file plugins/generic/cinfo/CinfoPlugin.php
  *
- * Copyright (c) 2014-2020 Simon Fraser University
- * Copyright (c) 2003-2020 John Willinsky
+ * Copyright (c) 2014-2026 Simon Fraser University
+ * Copyright (c) 2003-2026 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class cinfo
@@ -16,7 +16,7 @@
 namespace APP\plugins\generic\cinfo;
 
 use APP\core\Application;
-use PKP\db\DAORegistry;
+use APP\facades\Repo;
 use PKP\plugins\GenericPlugin;
 use PKP\plugins\Hook;
 use PKP\core\JSONMessage;
@@ -31,13 +31,17 @@ class CinfoPlugin extends GenericPlugin {
     public function register($category, $path, $mainContextId = NULL) {
         $success = parent::register($category, $path);
         if ($success && $this->getEnabled()) {
-			Hook::add('Templates::Article::Details', [$this, 'addCinfo']);
-			Hook::add('Templates::Preprint::Details', [$this, 'addCinfo']);
-			Hook::add('Templates::Catalog::Book::Details', [$this, 'addCinfo']);
-			Hook::add('Templates::Catalog::Chapter::Details', [$this, 'addCinfo']);
+            Hook::add('Templates::Article::Details', [$this, 'addCinfo']);
+            Hook::add('Templates::Preprint::Details', [$this, 'addCinfo']);
+            Hook::add('Templates::Catalog::Book::Details', [$this, 'addCinfo']);
+            Hook::add('Templates::Catalog::Chapter::Details', [$this, 'addCinfo']);
+			Hook::add('Schema::get::publication', array($this, 'addToSchema'));
+			Hook::add('Schema::get::submission', array($this, 'addToSchema'));
+            Hook::add('Form::config::before', [$this, 'addToForm']);
+            Hook::add('Publication::version', [$this, 'versionPublication']);
         }
         return $success;
-    }	
+    }
 
 	/**
 	 * @see LazyLoadPlugin::getName()
@@ -71,44 +75,25 @@ class CinfoPlugin extends GenericPlugin {
      * @return array
      */
     public function getActions($request, $actionArgs) {
-
-        // Get the existing actions
         $actions = parent::getActions($request, $actionArgs);
-
-        // Only add the settings action when the plugin is enabled
         if (!$this->getEnabled()) {
             return $actions;
         }
-
-        // Create a LinkAction that will make a request to the
-        // plugin's `manage` method with the `settings` verb.
         $router = $request->getRouter();
         $linkAction = new LinkAction(
             'settings',
             new AjaxModal(
-                $router->url(
-                    $request,
-                    null,
-                    null,
-                    'manage',
-                    null,
-                    [
-                        'verb' => 'settings',
-                        'plugin' => $this->getName(),
-                        'category' => 'generic'
-                    ]
-                ),
+                $router->url($request, null, null, 'manage', null, [
+                    'verb' => 'settings',
+                    'plugin' => $this->getName(),
+                    'category' => 'generic'
+                ]),
                 $this->getDisplayName()
             ),
             __('manager.plugins.settings'),
             null
         );
-
-        // Add the LinkAction to the existing actions.
-        // Make it the first action to be consistent with
-        // other plugins.
         array_unshift($actions, $linkAction);
-
         return $actions;
     }
 
@@ -123,19 +108,12 @@ class CinfoPlugin extends GenericPlugin {
     public function manage($args, $request) {
         switch ($request->getUserVar('verb')) {
             case 'settings':
-
-				$contextId = Application::get()->getRequest()->getContext()->getId();
-                // Load the custom form
+                $contextId = Application::get()->getRequest()->getContext()->getId();
                 $form = new CinfoSettingsForm($this, $contextId);
-
-                // Fetch the form the first time it loads, before
-                // the user has tried to save it
                 if (!$request->getUserVar('save')) {
                     $form->initData();
                     return new JSONMessage(true, $form->fetch($request));
                 }
-
-                // Validate and save the form data
                 $form->readInputData();
                 if ($form->validate()) {
                     $form->execute();
@@ -146,26 +124,110 @@ class CinfoPlugin extends GenericPlugin {
     }
 
 	/**
+	 * Add a property to the submission schema
+	 *
+	 * @param $hookName string `Schema::get::submission`
+	 * @param $args [[
+	 * 	@option object Submission schema
+	 * ]]
+	 */
+    public function addToSchema($hookName, $args) {
+        $schema = $args[0];
+        $schema->properties->cinfoLabel = json_decode('{
+            "type": "boolean",
+            "apiSummary": true,
+            "validation": ["nullable"]
+        }');
+    }
+
+	/**
+	 * Add a form field to a form
+	 *
+	 * @param $hookName string `Form::config::before`
+	 * @param $form FormHandler
+	 */
+    public function addToForm($hookName, $form) {
+        $contextId = Application::get()->getRequest()->getContext()->getId();
+
+        if (!$this->getSetting($contextId, 'cinfoPerArticle')) {
+            return;
+        }
+
+		if (!defined('FORM_PUBLICATION_LICENSE') || $form->id !== FORM_PUBLICATION_LICENSE) {
+			return;
+		}
+
+        $publicationId = (int) basename($form->action);
+        $publication = $publicationId ? Repo::publication()->get($publicationId) : null;
+
+		if (!$publication) {
+			return;
+		}
+
+        $form->addField(new \PKP\components\forms\FieldOptions('cinfoLabel', [
+            'label' => __('plugins.generic.cinfo.cinfoLabel.name'),
+            'options' => [
+                ['value' => true, 'label' => __('plugins.generic.cinfo.cinfoLabel.description')]
+            ],
+            'value' => $publication->getData('cinfoLabel'),
+        ]));
+    }
+
+	/**
+	 * Copy cinfoLabel value when a new version is created
+	 *
+	 * @param $hookName string
+	 * @param $args array [
+	 *		@option Publication The new version of the publication
+	 *		@option Publication The old version of the publication
+	 *		@option Request
+	 * ]
+	 */
+    public function versionPublication($hookName, $args) {
+        $newPublication = $args[0];
+        $oldPublication = $args[1];
+        if ($cinfoLabel = $oldPublication->getData('cinfoLabel')) {
+            $newPublication->setData('cinfoLabel', $cinfoLabel);
+        }
+    }
+
+	/**
 	 * Add the Cinfo button div
 	 * @param $hookName string
 	 * @param $params array
 	 */
-	function addCinfo($hookName, $params) {
-		$request = $this->getRequest();
-		$context = $request->getContext();
-		$cinfoButtonCode = $this->getSetting($context->getId(), 'cinfoButtonCode');
+    function addCinfo($hookName, $params) {
+        $request = $this->getRequest();
+        $context = $request->getContext();
+        $cinfoButtonCode = $this->getSetting($context->getId(), 'cinfoButtonCode');
 
-		if (empty($cinfoButtonCode)) return false;
+        if (empty($cinfoButtonCode)) return false;
 
-		$templateMgr =& $params[1];
-		$output =& $params[2];
+        $cinfoPerArticle = $this->getSetting($context->getId(), 'cinfoPerArticle');
 
-		$templateMgr->assign('cinfoButtonCode', $cinfoButtonCode);
+        $templateMgr =& $params[1];
+        $output =& $params[2];
 
-		$output .= $templateMgr->fetch($this->getTemplateResource('cinfo.tpl'));
-		return false;
+        if ($cinfoPerArticle) {
+            // If the per-article setting is enabled, only display the button if the article has the cinfoLabel set to true
+            $applicationName = Application::get()->getName();
+            if ($applicationName == 'ojs2') {
+                $submission = $templateMgr->getTemplateVars('article');
+            }
+            if ($applicationName == 'omp') {
+                $submission = $templateMgr->getTemplateVars('publishedSubmission');
+            }
 
-	}
+            if ($submission && $submission->getCurrentPublication()->getData('cinfoLabel')) {
+                $templateMgr->assign('cinfoButtonCode', $cinfoButtonCode);
+                $output .= $templateMgr->fetch($this->getTemplateResource('cinfo.tpl'));
+                return false;
+            }
+        } else {
+            // If the per-article setting is not enabled, display the button for all articles
+            $templateMgr->assign('cinfoButtonCode', $cinfoButtonCode);
+            $output .= $templateMgr->fetch($this->getTemplateResource('cinfo.tpl'));
+            return false;
+        }
+    }
 }
-
-?>

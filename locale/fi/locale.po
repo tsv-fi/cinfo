@@ -18,10 +18,22 @@ msgid "plugins.generic.cinfo.description"
 msgstr "Lisää C-info-koodin abstraktisivulle."
 
 msgid "plugins.generic.cinfo.manager.settings.description"
-msgstr "Anna C-info-painikkeen koodi alla olevaan tekstilaatikkoon ja tallenna."
+msgstr "Luo C-info-painiketta koskeva koodi palvelun kotisivuilla olevalla lomakkeella. Lisää samaasi C-info-painikkeen koodi alla olevaan tekstilaatikkoon ja tallenna."
 
 msgid "plugins.generic.cinfo.manager.settings.cinfoButtonCode"
 msgstr "C-info-painikkeen koodi"
 
 msgid "plugins.generic.cinfo.manager.settings.cinfoButtonCodeRequired"
 msgstr "C-info-painikkeen koodi vaaditaan."
+
+msgid "plugins.generic.cinfo.manager.settings.cinfoPerArticleDescription"
+msgstr "Lisäosan ollessa päällä annettu C-info-painike lisätään oletuksena kaikkiin sisältöihin. Mikäli haluat liittää painikkeen vain tiettyihin artikkeleihin/kirjoihin, niin aktivoi alla oleva valinta. Tällöin painike lisätään artikkelin/kirjan lisenssitietoja koskevista asetuksista."
+
+msgid "plugins.generic.cinfo.manager.settings.cinfoPerArticle"
+msgstr "C-info-painike lisätään vain valittuihin artikkeleihin"
+
+msgid "plugins.generic.cinfo.cinfoLabel.name"
+msgstr "C-info"
+
+msgid "plugins.generic.cinfo.cinfoLabel.description"
+msgstr "Lisää C-info-painike"

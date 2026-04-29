@@ -3,8 +3,8 @@
 /**
  * @file plugins/generic/cinfo/CinfoSettingsForm.inc.php
  *
- * Copyright (c) 2014-2020 Simon Fraser University
- * Copyright (c) 2003-2020 John Willinsky
+ * Copyright (c) 2014-2026 Simon Fraser University
+ * Copyright (c) 2003-2026 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class cinfoSettingsForm
@@ -19,10 +19,7 @@ use PKP\form\Form;
 use PKP\form\validation\FormValidator;
 use PKP\form\validation\FormValidatorPost;
 use PKP\form\validation\FormValidatorCSRF;
-use APP\notification\NotificationManager;
 use APP\template\TemplateManager;
-use APP\core\Application;
-use PKP\notification\Notification;
 
 class CinfoSettingsForm extends Form {
 
@@ -37,50 +34,49 @@ class CinfoSettingsForm extends Form {
 	 * @param $plugin CinfoPlugin
 	 * @param $contextId int
 	 */
-	function __construct($plugin, $contextId) {
-		$this->contextId = $contextId;
-		$this->plugin = $plugin;
-
-		parent::__construct($plugin->getTemplateResource('settingsForm.tpl'));
-
-		$this->addCheck(new FormValidator($this, 'cinfoButtonCode', 'required', 'plugins.generic.cinfo.manager.settings.cinfoButtonCodeRequired'));
-
-		$this->addCheck(new FormValidatorPost($this));
-		$this->addCheck(new FormValidatorCSRF($this));
-	}
+    function __construct($plugin, $contextId) {
+        $this->contextId = $contextId;
+        $this->plugin = $plugin;
+        parent::__construct($plugin->getTemplateResource('settingsForm.tpl'));
+        $this->addCheck(new FormValidator($this, 'cinfoButtonCode', 'required', 'plugins.generic.cinfo.manager.settings.cinfoButtonCodeRequired'));
+        $this->addCheck(new FormValidatorPost($this));
+        $this->addCheck(new FormValidatorCSRF($this));
+    }
 
 	/**
 	 * Initialize form data.
 	 */
-	function initData() {
-		$this->_data = array(
-			'cinfoButtonCode' => $this->plugin->getSetting($this->contextId, 'cinfoButtonCode'),
-		);
-	}
+    function initData() {
+        $this->_data = [
+            'cinfoButtonCode' => $this->plugin->getSetting($this->contextId, 'cinfoButtonCode'),
+            'cinfoPerArticle' => $this->plugin->getSetting($this->contextId, 'cinfoPerArticle'),
+        ];
+    }
 
 	/**
 	 * Assign form data to user-submitted data.
 	 */
-	function readInputData() {
-		$this->readUserVars(array('cinfoButtonCode'));
-	}
+    function readInputData() {
+        $this->readUserVars(['cinfoButtonCode', 'cinfoPerArticle']);
+    }
 
 	/**
 	 * Fetch the form.
 	 * @copydoc Form::fetch()
 	 */
-	function fetch($request, $template = null, $display = false) {
-		$templateMgr = TemplateManager::getManager($request);
-		$templateMgr->assign('pluginName', $this->plugin->getName());
-		return parent::fetch($request, $template, $display);
-	}
+    function fetch($request, $template = null, $display = false) {
+        $templateMgr = TemplateManager::getManager($request);
+        $templateMgr->assign('pluginName', $this->plugin->getName());
+        return parent::fetch($request, $template, $display);
+    }
 
 	/**
 	 * Save settings.
 	 */
-	function execute(...$functionArgs) {
-		$this->plugin->updateSetting($this->contextId, 'cinfoButtonCode', trim($this->getData('cinfoButtonCode'), "\"\';"), 'string');
-	}
+    function execute(...$functionArgs) {
+        $this->plugin->updateSetting($this->contextId, 'cinfoButtonCode', trim($this->getData('cinfoButtonCode'), "\"\';"), 'string');
+        $this->plugin->updateSetting($this->contextId, 'cinfoPerArticle', (bool) $this->getData('cinfoPerArticle'), 'bool');
+    }
 }
 
 ?>
