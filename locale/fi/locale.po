@@ -26,11 +26,11 @@ msgstr "C-info-painikkeen koodi"
 msgid "plugins.generic.cinfo.manager.settings.cinfoButtonCodeRequired"
 msgstr "C-info-painikkeen koodi vaaditaan."
 
-msgid "plugins.generic.cinfo.manager.settings.cinfoPerArticleDescription"
-msgstr "Lisäosan ollessa päällä annettu C-info-painike lisätään oletuksena kaikkiin sisältöihin. Mikäli haluat liittää painikkeen vain tiettyihin artikkeleihin/kirjoihin, niin aktivoi alla oleva valinta. Tällöin painike lisätään artikkelin/kirjan lisenssitietoja koskevista asetuksista."
+msgid "plugins.generic.cinfo.manager.settings.cinfoPerSubmissionDescription"
+msgstr "Lisäosan ollessa päällä annettu C-info-painike lisätään oletuksena kaikkiin sisältöihin. Mikäli haluat liittää painikkeen vain tiettyihin julkaisuihin, niin aktivoi alla oleva valinta. Tällöin painike lisätään julkaisun lisenssitietoja koskevista asetuksista."
 
-msgid "plugins.generic.cinfo.manager.settings.cinfoPerArticle"
-msgstr "C-info-painike lisätään vain valittuihin artikkeleihin"
+msgid "plugins.generic.cinfo.manager.settings.cinfoPerSubmission"
+msgstr "C-info-painike lisätään vain valittuihin julkaisuihin"
 
 msgid "plugins.generic.cinfo.cinfoLabel.name"
 msgstr "C-info"

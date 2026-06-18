@@ -28,8 +28,8 @@
 		{/fbvFormSection}
 
 		{fbvFormSection list="true"}
-			<p>{translate key="plugins.generic.cinfo.manager.settings.cinfoPerArticleDescription"}</p>
-			{fbvElement type="checkbox" id="cinfoPerArticle" value="1" checked=$cinfoPerArticle label="plugins.generic.cinfo.manager.settings.cinfoPerArticle"}
+			<p>{translate key="plugins.generic.cinfo.manager.settings.cinfoPerSubmissionDescription"}</p>
+			{fbvElement type="checkbox" id="cinfoPerSubmission" value="1" checked=$cinfoPerSubmission label="plugins.generic.cinfo.manager.settings.cinfoPerSubmission"}
 		{/fbvFormSection}
 
     {/fbvFormArea}

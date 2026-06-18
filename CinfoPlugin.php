@@ -149,7 +149,7 @@ class CinfoPlugin extends GenericPlugin {
     public function addToForm($hookName, $form) {
         $contextId = Application::get()->getRequest()->getContext()->getId();
 
-        if (!$this->getSetting($contextId, 'cinfoPerArticle')) {
+        if (!($this->getSetting($contextId, 'cinfoPerSubmission') ?? $this->getSetting($contextId, 'cinfoPerArticle'))) {
             return;
         }
 
@@ -203,20 +203,22 @@ class CinfoPlugin extends GenericPlugin {
 
         if (empty($cinfoButtonCode)) return false;
 
-        $cinfoPerArticle = $this->getSetting($context->getId(), 'cinfoPerArticle');
+        $cinfoPerSubmission = $this->getSetting($context->getId(), 'cinfoPerSubmission')
+            ?? $this->getSetting($context->getId(), 'cinfoPerArticle');
 
         $templateMgr =& $params[1];
         $output =& $params[2];
 
-        if ($cinfoPerArticle) {
-            // If the per-article setting is enabled, only display the button if the article has the cinfoLabel set to true
-            $applicationName = Application::get()->getName();
-            if ($applicationName == 'ojs2') {
-                $submission = $templateMgr->getTemplateVars('article');
-            }
-            if ($applicationName == 'omp') {
-                $submission = $templateMgr->getTemplateVars('publishedSubmission');
-            }
+        if ($cinfoPerSubmission) {
+            $submissionVarMap = [
+                'Templates::Article::Details' => 'article',
+                'Templates::Preprint::Details' => 'preprint',
+                'Templates::Catalog::Book::Details' => 'publishedSubmission',
+                'Templates::Catalog::Chapter::Details' => 'publishedSubmission',
+            ];
+            $submission = isset($submissionVarMap[$hookName])
+                ? $templateMgr->getTemplateVars($submissionVarMap[$hookName])
+                : null;
 
             if ($submission && $submission->getCurrentPublication()->getData('cinfoLabel')) {
                 $templateMgr->assign('cinfoButtonCode', $cinfoButtonCode);

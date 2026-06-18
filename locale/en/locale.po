@@ -26,11 +26,11 @@ msgstr "C-info icon code"
 msgid "plugins.generic.cinfo.manager.settings.cinfoButtonCodeRequired"
 msgstr "C-info icon code is required"
 
-msgid "plugins.generic.cinfo.manager.settings.cinfoPerArticle"
-msgstr "The C-info icon is added only to selected articles"
+msgid "plugins.generic.cinfo.manager.settings.cinfoPerSubmission"
+msgstr "The C-info icon is added only to selected submissions"
 
-msgid "plugins.generic.cinfo.manager.settings.cinfoPerArticleDescription"
-msgstr "When the plugin is enabled, the C-info icon is added to all content by default. If you want to attach C-info only to specific selected articles/books, enable the option below. In that case, the icon can be added through the license settings for each article/book."
+msgid "plugins.generic.cinfo.manager.settings.cinfoPerSubmissionDescription"
+msgstr "When the plugin is enabled, the C-info icon is added to all content by default. If you want to attach C-info only to specific selected submissions, enable the option below. In that case, the icon can be added through the license settings for each submission."
 
 msgid "plugins.generic.cinfo.cinfoLabel.name"
 msgstr "C-info"

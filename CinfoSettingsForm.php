@@ -49,7 +49,8 @@ class CinfoSettingsForm extends Form {
     function initData() {
         $this->_data = [
             'cinfoButtonCode' => $this->plugin->getSetting($this->contextId, 'cinfoButtonCode'),
-            'cinfoPerArticle' => $this->plugin->getSetting($this->contextId, 'cinfoPerArticle'),
+            'cinfoPerSubmission' => $this->plugin->getSetting($this->contextId, 'cinfoPerSubmission')
+                ?? $this->plugin->getSetting($this->contextId, 'cinfoPerArticle'),
         ];
     }
 
@@ -57,7 +58,7 @@ class CinfoSettingsForm extends Form {
 	 * Assign form data to user-submitted data.
 	 */
     function readInputData() {
-        $this->readUserVars(['cinfoButtonCode', 'cinfoPerArticle']);
+        $this->readUserVars(['cinfoButtonCode', 'cinfoPerSubmission']);
     }
 
 	/**
@@ -75,7 +76,7 @@ class CinfoSettingsForm extends Form {
 	 */
     function execute(...$functionArgs) {
         $this->plugin->updateSetting($this->contextId, 'cinfoButtonCode', trim($this->getData('cinfoButtonCode'), "\"\';"), 'string');
-        $this->plugin->updateSetting($this->contextId, 'cinfoPerArticle', (bool) $this->getData('cinfoPerArticle'), 'bool');
+        $this->plugin->updateSetting($this->contextId, 'cinfoPerSubmission', (bool) $this->getData('cinfoPerSubmission'), 'bool');
     }
 }
 
